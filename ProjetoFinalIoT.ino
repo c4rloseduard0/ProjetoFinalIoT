@@ -49,6 +49,7 @@ const char* mqttUser = "ilnczjao";
 const int mqttPort = 15336;
 const char* mqttPassword = "ZpofjvUKX0NS";
 
+WiFiClient tsclient;
 WiFiClient client; //Objeto da classe WifiClient
 Ultrasonic ultrasonic(TRIGGER, ECHO); //Inicia o sensor ultrassônico
 PubSubClient mqttClient(client); //Objeto da classe PubsubClient
@@ -118,7 +119,7 @@ void move_porta() {
 //Função que envia os dados dos sensores ao ThinkSpeak
 void enviaValores(float cmMsec, float temperatura, float ldr){
       
-  if (client.connect(server,80)){  
+  if (tsclient.connect(server,80)){  
     String postStr = keyThignkSpeak;
     postStr +="&field1="; 
     postStr += String(cmMsec);
@@ -126,17 +127,17 @@ void enviaValores(float cmMsec, float temperatura, float ldr){
     postStr += String(temperatura);
     postStr +="&field3="; 
     postStr += String(ldr);
-    client.print("POST /update HTTP/1.1\n");
-    client.print("Host: api.thingspeak.com\n");
-    client.print("Connection: close\n");
-    client.print("X-THINGSPEAKAPIKEY: "+keyThignkSpeak+"\n");
-    client.print("Content-Type: application/x-www-form-urlencoded\n");
-    client.print("Content-Length: ");
-    client.print(postStr.length());
-    client.print("\n\n");
-    client.print(postStr);
+    tsclient.print("POST /update HTTP/1.1\n");
+    tsclient.print("Host: api.thingspeak.com\n");
+    tsclient.print("Connection: close\n");
+    tsclient.print("X-THINGSPEAKAPIKEY: "+keyThignkSpeak+"\n");
+    tsclient.print("Content-Type: application/x-www-form-urlencoded\n");
+    tsclient.print("Content-Length: ");
+    tsclient.print(postStr.length());
+    tsclient.print("\n\n");
+    tsclient.print(postStr);
   }
-  client.stop(); 
+  tsclient.stop(); 
   Serial.print("Distância: ");
   Serial.println(cmMsec);
   Serial.print("Temperatura: ");
@@ -145,7 +146,6 @@ void enviaValores(float cmMsec, float temperatura, float ldr){
   Serial.println(ldr);
   Serial.println("----------------------");
   Serial.println("Waiting...");
-  delay(1000);
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -202,8 +202,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 }
-
+long previousMillis = 0;
 void loop(){
+  unsigned long currentMillis = millis();
   Blynk.run();
   mqttClient.loop();
   if ( pinValue == 1) {
@@ -239,6 +240,9 @@ void loop(){
   Serial.println(temperatura);
   Serial.print("LDR: ");
   Serial.println(medLdr);
-  delay(1000);
-//  enviaValores(cmMsec, temperatura, medLdr);
+  if (currentMillis - previousMillis > 15000) {
+    enviaValores(cmMsec, temperatura, medLdr);
+    previousMillis = currentMillis;
+  }
 }
+
