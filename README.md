@@ -8,7 +8,7 @@
 3.1 [LDR](#ldr)  
 3.2 [Servo](#servo)  
 3.3 [Sensor de Temperatura](#sensor-de-temperatura)  
-3.4 [Sensor Ultrasonico](#sensor-ultrassonico)
+3.4 [Sensor Ultrasonico](#sensor-ultrassonico)  
 3.5 [Projeto Final](#projeto-final)  
 
 ## Objetivo
