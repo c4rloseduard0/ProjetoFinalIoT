@@ -15,14 +15,14 @@ Este projeto visa automatizar a alimentação de animais domésticos usando recu
 
 ## Material Utilizado
 
-1 Servo Motor 9g
-1 sensor ultrasônico HC-SR04
-1 Sensor de temperatura LM35
-2 Sensor de luminosidade LDR
-1 ESP32
-2 Resistores 10k Ω
-1 Protoboard
-Alguns jumpers
+* 1 Servo Motor 9g
+* 1 sensor ultrasônico HC-SR04
+* 1 Sensor de temperatura LM35
+* 2 Sensor de luminosidade LDR
+* 1 ESP32
+* 2 Resistores 10k Ω
+* 1 Protoboard
+* Alguns jumpers
 
 ## Montagem
 OBS.: As imagens têm fim puramente didático, os sensores não ficaram juntos à protoboard, mas sim distribuídos por toda a maquete.
