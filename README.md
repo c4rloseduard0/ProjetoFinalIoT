@@ -8,7 +8,7 @@
 3.1 [LDR](#ldr)  
 3.2 [Servo](#servo)  
 3.3 [Sensor de Temperatura](#sensor-de-temperatura)  
-3.4 [Sensor Ultrasonico](#sensor-ultrasonico)  
+3.4 [Sensor Ultrasonico](#sensor-ultrassonico)  
 
 ## Objetivo
 Este projeto visa automatizar a alimentação de animais domésticos usando recursos online e bluetooth
