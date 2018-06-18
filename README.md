@@ -14,9 +14,9 @@
 4.1 [setup()](#setup)  
 4.2 [loop()](#loop)  
 4.3 [move_porta()](#move_porta)  
-4.4 [enviaValores()](#enviaalores)  
-4.5 [callback()](#callback)  
-4.6 [enviaBlynk()](#enviablynk)  
+4.4 [enviaValores()](#enviavalores-float-cmmsec-float-temperatura-float-ldr)  
+4.5 [callback()](#callback-char-topic-byte-payload-unsigned-int-length)  
+4.6 [enviaBlynk()](#enviablynk-float-cmmsec-float-temperatura-float-ldr)  
 
 ## Objetivo
 Este projeto visa automatizar a alimentação de animais domésticos usando recursos online e bluetooth
