@@ -54,8 +54,20 @@ WiFiClient client; //Objeto da classe WifiClient
 Ultrasonic ultrasonic(TRIGGER, ECHO); //Inicia o sensor ultrassônico
 PubSubClient mqttClient(client); //Objeto da classe PubsubClient
 
-BLYNK_WRITE(V1){ //Retorna o valor do botão virtual
+BLYNK_WRITE(V1){ //Retorna o valor do botão virtual 
   pinValue = param.asInt(); 
+}
+
+BLYNK_WRITE(V5){ //Retorna o valor do botão virtual 
+  istrueLdr = param.asInt(); 
+}
+
+BLYNK_WRITE(V6){ //Retorna o valor do botão virtual 
+  istrueTemp = param.asInt(); 
+}
+
+BLYNK_WRITE(V7){ //Retorna o valor do botão virtual 
+  istrueSom = param.asInt(); 
 }
 
 void setup(){
@@ -202,6 +214,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 }
+
+void enviaBlynk(float cmMsec, float temperatura, float ldr){
+  Blynk.virtualWrite(V2, ldr);         //Envia os dados do sensor de luminosidade para a porta Vitual 2
+  Blynk.virtualWrite(V3, temperatura); //Envia os dados do sensor de temperatura para a porta Vitual 3
+  Blynk.virtualWrite(V4, cmMsec);      //Envia os dados do sensor ultrassonico para a porta Vitual 4
+}
+
 long previousMillis = 0;
 void loop(){
   unsigned long currentMillis = millis();
@@ -242,7 +261,7 @@ void loop(){
   Serial.println(medLdr);
   if (currentMillis - previousMillis > 15000) {
     enviaValores(cmMsec, temperatura, medLdr);
+    enviaBlynk(cmMsec, temperatura, medLdr);
     previousMillis = currentMillis;
   }
 }
-
