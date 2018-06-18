@@ -17,6 +17,7 @@
 4.4 [enviaValores()](#enviavalores-float-cmmsec-float-temperatura-float-ldr)  
 4.5 [callback()](#callback-char-topic-byte-payload-unsigned-int-length)  
 4.6 [enviaBlynk()](#enviablynk-float-cmmsec-float-temperatura-float-ldr)  
+4.7 [notificar()](#notificar-string-msg)  
 
 ## Objetivo
 Este projeto visa automatizar a alimentação de animais domésticos usando recursos online e bluetooth
@@ -67,3 +68,6 @@ A função callback é usada pelo do objeto da classe PubSubClient, para receber
 
 #### enviaBlynk (float cmMsec, float temperatura, float ldr)
 A função enviaBlynk é similar a função enviaDados, ela recebe os mesmos parâmetros e os envia ao app [Blynk](https://www.blynk.cc/)
+
+#### notificar (String msg)
+A função notificar envia uma notificação para o smartphone usando o [PushBullet](https://www.pushbullet.com/), assim como a função envia dados, ela cria um header HTTP e faz uma requisição do tipo POST
