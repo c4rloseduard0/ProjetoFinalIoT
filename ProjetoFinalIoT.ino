@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <BlynkSimpleEsp32.h>
 #include <Ultrasonic.h>
 #include <PubSubClient.h>
@@ -7,6 +8,7 @@
 //Declaração das API keys blynk, thinkspeak, cloudmqtt)
 char blynkAuth[] = "db573e62b4594161acec725b43b10332";
 String keyThignkSpeak = "MK8HO6U55RJB3FVM";
+const char* PushBulletAPIKEY = "o.5SB29tKxaNPQhheSTq3skyqT4PgQkG9D";
 
 //Credenciais para fazer login na rede
 char ssid[] = "AP 303";
@@ -15,6 +17,7 @@ char pass[] = "81463544";
 //Servidores
 char server[] = "api.thingspeak.com";
 const char* mqttServer = "m14.cloudmqtt.com";
+const char* host = "api.pushbullet.com";
 
 int pinValue; //Variavel que pega o valor do botão virtual do blynk
 
@@ -30,7 +33,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length);
 #define LDR2 35
 
 //Variaveis de controle
-int istrueLdr, istrueTemp, istrueSom, istrueTodos;
+int istrueLdr, istrueTemp, istrueSom;
 
 //Variaveis usadas para inicialização do servo
 int freq = 50;
@@ -49,7 +52,9 @@ const char* mqttUser = "ilnczjao";
 const int mqttPort = 15336;
 const char* mqttPassword = "ZpofjvUKX0NS";
 
-WiFiClient tsclient;
+const int httpsPort = 443; //Porta PushBullet
+
+WiFiClient tsclient; //ThinkSpeakClient
 WiFiClient client; //Objeto da classe WifiClient
 Ultrasonic ultrasonic(TRIGGER, ECHO); //Inicia o sensor ultrassônico
 PubSubClient mqttClient(client); //Objeto da classe PubsubClient
@@ -178,39 +183,50 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     if (msg.equals("LU")) {
       istrueSom = 1;
+      Blynk.virtualWrite(V7, 1);
     }
 
     if (msg.equals("DU")) {
       istrueSom = 0;
+      Blynk.virtualWrite(V7, 0);
     }
 
     if (msg.equals("LT")) {
       istrueTemp = 1;
+      Blynk.virtualWrite(V6, 1);
     }
 
     if (msg.equals("DT")) {
       istrueTemp = 0;
+      Blynk.virtualWrite(V6, 0);
     }
 
     if (msg.equals("LL")) {
       istrueLdr = 1;
-      Serial.println("Passou por aqui");
+      Blynk.virtualWrite(V5, 1);
     }
 
     if(msg.equals("DL")) {
       istrueLdr = 0;
+      Blynk.virtualWrite(V5, 0);
     }
 
     if (msg.equals("LA")){
       istrueLdr =  1;
       istrueTemp = 1;
       istrueSom = 1;
+      Blynk.virtualWrite(V5, 1);
+      Blynk.virtualWrite(V6, 1);
+      Blynk.virtualWrite(V7, 1);
     }
 
     if (msg.equals("DA")){
       istrueLdr =  0;
       istrueTemp = 0;
       istrueSom = 0;
+      Blynk.virtualWrite(V5, 0);
+      Blynk.virtualWrite(V6, 0);
+      Blynk.virtualWrite(V7, 0);
     }
   }
 }
@@ -221,9 +237,38 @@ void enviaBlynk(float cmMsec, float temperatura, float ldr){
   Blynk.virtualWrite(V4, cmMsec);      //Envia os dados do sensor ultrassonico para a porta Vitual 4
 }
 
+void notificar(String msg){
+  WiFiClientSecure pbclient;
+  Serial.print("connecting to ");
+  Serial.println(host);
+  if (!pbclient.connect(host, httpsPort)) {
+    Serial.println("connection failed");
+    return;
+  }
+  
+  String url = "/v2/pushes";
+  String messagebody = msg;
+
+  pbclient.print(String("POST ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" +
+               "Authorization: Bearer " + PushBulletAPIKEY + "\r\n" +
+               "Content-Type: application/json\r\n" +
+               "Content-Length: " +
+               String(messagebody.length()) + "\r\n\r\n");
+  pbclient.print(messagebody);
+
+  Serial.println("Requisicao enviada, verifique o celular");
+
+}
+
+
 long previousMillis = 0;
+long previousMillisTemp = 0;
+long previousMillisSom = 0;
+long previousMillisLdr = 0;
 void loop(){
   unsigned long currentMillis = millis();
+  
   Blynk.run();
   mqttClient.loop();
   if ( pinValue == 1) {
@@ -253,12 +298,22 @@ void loop(){
   }else{
     temperatura = 0;
   }
-  Serial.print("Distância: ");
-  Serial.println(cmMsec);
-  Serial.print("Temperatura: ");
-  Serial.println(temperatura);
-  Serial.print("LDR: ");
-  Serial.println(medLdr);
+
+  if (temperatura > 30.0 && currentMillis - previousMillisTemp > 15000){
+    notificar("{\"type\": \"note\", \"title\": \"Trocar Água\", \"body\": \"Água não está na temperatura ideal\"}\r\n");    
+    previousMillisTemp = currentMillis;
+  }
+
+  if (cmMsec < 30 && medLdr > 500 && currentMillis - previousMillisSom > 15000){
+     notificar("{\"type\": \"note\", \"title\": \"Comida\", \"body\": \"Animal está com fome, mas não tem ração\"}\r\n");    
+     previousMillisSom = currentMillis;  
+  }
+
+  if (medLdr > 500 && currentMillis - previousMillisLdr > 15000){
+     notificar("{\"type\": \"note\", \"title\": \"Comida\", \"body\": \"Não tem ração. Repor\"}\r\n");    
+     previousMillisLdr = currentMillis;
+  }
+  
   if (currentMillis - previousMillis > 15000) {
     enviaValores(cmMsec, temperatura, medLdr);
     enviaBlynk(cmMsec, temperatura, medLdr);
