@@ -1,5 +1,13 @@
 # Alimentador de Cães e Gatos
 
+#### Autores: 
+
+Carlos Eduardo Tabosa Silva  
+Carlos Roberto Silva de Lima  
+Ingrynd Vasconcelos Loiola  
+Maria Flavia Masques Aragão  
+Thalita Alencar de Carvalho  
+
 ## Sumário
 
 1. [Objetivo](#objetivo)
